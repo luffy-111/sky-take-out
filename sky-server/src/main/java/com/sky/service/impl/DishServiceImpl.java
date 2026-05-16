@@ -148,4 +148,15 @@ public class DishServiceImpl implements DishService {
         dishMapper.deleteBatch(ids);
         dishFlavorMapper.deleteByDishId(ids);
     }
+
+    /**
+     * 查询菜品数据
+     *
+     * @param dish
+     * @return
+     */
+    @Override
+    public List<Dish> list(Dish dish) {
+        return dishMapper.list(dish);
+    }
 }

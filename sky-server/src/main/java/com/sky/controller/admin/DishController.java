@@ -3,6 +3,7 @@ package com.sky.controller.admin;
 
 import com.sky.dto.DishDTO;
 import com.sky.dto.DishPageQueryDTO;
+import com.sky.entity.Dish;
 import com.sky.result.PageResult;
 import com.sky.result.Result;
 import com.sky.service.DishService;
@@ -107,5 +108,13 @@ public class DishController {
         log.info("根据ID批量删除菜品：{}", ids);
         dishService.deleteBatch(ids);
         return Result.success();
+    }
+
+    @GetMapping("/list")
+    @ApiOperation("查询菜品数据")
+    public Result<List<Dish>> list(Dish dish) {
+        log.info("查询菜品数据：{}", dish);
+        List<Dish> list = dishService.list(dish);
+        return Result.success(list);
     }
 }
