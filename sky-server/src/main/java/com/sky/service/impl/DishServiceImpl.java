@@ -2,6 +2,7 @@ package com.sky.service.impl;
 
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.sky.constant.StatusConstant;
 import com.sky.dto.DishDTO;
 import com.sky.dto.DishPageQueryDTO;
 import com.sky.entity.Dish;
@@ -16,7 +17,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @Slf4j
@@ -113,7 +117,7 @@ public class DishServiceImpl implements DishService {
         // 更新菜品基本信息
         dishMapper.updateDish(dish);
         // 删除旧口味
-        dishFlavorMapper.deleteByDishId(dishDTO.getId());
+        dishFlavorMapper.deleteByDishId(Collections.singletonList(dishDTO.getId()));
         List<DishFlavor> flavors = dishDTO.getFlavors();
         // 判断空值，防止空插入
         if (flavors != null && !flavors.isEmpty()) {
@@ -124,5 +128,24 @@ public class DishServiceImpl implements DishService {
             // 批量插入新口味
             dishFlavorMapper.insertBatch(flavors);
         }
+    }
+
+    /**
+     * 批量删除菜品
+     *
+     * @param ids
+     */
+    @Override
+    @Transactional
+    public void deleteBatch(List<Long> ids) {
+        // 判断菜品是否在售
+        for (Long id : ids) {
+            Dish dish = dishMapper.getById(id);
+            if (dish.getStatus().equals(StatusConstant.ENABLE)) {
+                throw new RuntimeException("售中的菜品不能删除");
+            }
+        }
+        dishMapper.deleteBatch(ids);
+        dishFlavorMapper.deleteByDishId(ids);
     }
 }

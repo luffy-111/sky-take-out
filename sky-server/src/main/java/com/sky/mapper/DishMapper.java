@@ -6,7 +6,10 @@ import com.sky.dto.DishPageQueryDTO;
 import com.sky.entity.Dish;
 import com.sky.enumeration.OperationType;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+
+import java.util.List;
 
 @Mapper
 public interface DishMapper {
@@ -40,7 +43,6 @@ public interface DishMapper {
      * 根据id查询菜品和口味数据
      *
      * @param dish
-     * @return
      */
     @AutoFill(value = OperationType.UPDATE)
     void updateDish(Dish dish);
@@ -52,4 +54,11 @@ public interface DishMapper {
      * @return
      */
     Dish getById(Long id);
+
+    /**
+     * 批量删除菜品
+     *
+     * @param ids
+     */
+    void deleteBatch(@Param("ids") List<Long> ids);
 }
