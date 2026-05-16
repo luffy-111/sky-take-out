@@ -28,4 +28,19 @@ public interface DishService {
      *
      */
     void updateStatusById(Integer status, Long id);
+
+    /**
+     * 根据id查询菜品
+     *
+     * @param id
+     * @return
+     */
+    DishDTO getById(Long id);
+
+    /**
+     * 修改菜品
+     *
+     * @param dishDTO
+     */
+    void updateWithFlavor(DishDTO dishDTO);
 }
