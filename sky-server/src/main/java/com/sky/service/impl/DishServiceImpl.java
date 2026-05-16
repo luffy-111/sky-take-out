@@ -68,4 +68,19 @@ public class DishServiceImpl implements DishService {
         Page<Dish> page = dishMapper.pageQuery(dishPageQueryDTO);
         return new PageResult(page.getTotal(), page.getResult());
     }
+
+    /**
+     * 修改菜品状态
+     *
+     * @param status
+     * @param id
+     */
+    @Override
+    public void updateStatusById(Integer status, Long id) {
+        Dish dish = Dish.builder()
+                .id(id)
+                .status(status)
+                .build();
+        dishMapper.updateDish(dish);
+    }
 }

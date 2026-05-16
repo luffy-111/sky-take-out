@@ -35,4 +35,12 @@ public interface DishMapper {
      * @return
      */
     Page<Dish> pageQuery(DishPageQueryDTO dishPageQueryDTO);
+
+    /**
+     * 根据id查询菜品和口味数据
+     *
+     * @param dish
+     * @return
+     */
+    void updateDish(Dish dish);
 }

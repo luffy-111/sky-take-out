@@ -22,4 +22,10 @@ public interface DishService {
      * @return
      */
     PageResult page(DishPageQueryDTO dishPageQueryDTO);
+
+    /**
+     * 修改菜品
+     *
+     */
+    void updateStatusById(Integer status, Long id);
 }

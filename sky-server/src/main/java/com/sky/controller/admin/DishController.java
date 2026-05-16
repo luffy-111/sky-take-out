@@ -52,4 +52,16 @@ public class DishController {
         PageResult pageResult = dishService.page(dishPageQueryDTO);
         return Result.success(pageResult);
     }
+
+    /**
+     *
+     * 根据ID修改菜品启用禁用状态
+     */
+    @PostMapping("/status/{status}")
+    @ApiOperation("根据ID修改菜品启用禁用状态")
+    public Result<String> updateStatus(@PathVariable Integer status, Long id) {
+        log.info("根据ID修改菜品启用禁用状态：{},{}", status, id);
+        dishService.updateStatusById(status, id);
+        return Result.success();
+    }
 }
