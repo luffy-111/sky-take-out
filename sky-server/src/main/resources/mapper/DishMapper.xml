@@ -11,4 +11,15 @@
                 #{createUser}, #{updateUser})
     </insert>
 
+    <!--分页查询-->
+    <select id="pageQuery" resultType="com.sky.entity.Dish">
+        select * from dish
+        <where>
+            <if test="name != null and name != ''">
+                and name like CONCAT('%', #{name}, '%')
+            </if>
+        </where>
+        order by create_time desc
+    </select>
+
 </mapper>
