@@ -3,11 +3,19 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.sky.mapper.SetmealDishMapper">
 
-    <!---->
+    <!--新增套餐时套餐内的菜品-->
     <insert id="insertSetmealDish">
         insert into setmeal_dish (setmeal_id, dish_id, name, price, copies) values
         <foreach collection="setmealDishes" item="setmealDish" separator=",">
             (#{setmealDish.setmealId},#{setmealDish.dishId},#{setmealDish.name},#{setmealDish.price},#{setmealDish.copies})
         </foreach>
     </insert>
+
+    <!--删除套餐时删除套餐内的菜品-->
+    <delete id="deleteBySetmealIds">
+        delete from setmeal_dish where setmeal_id in
+        <foreach collection="ids" item="setmealId" separator="," open="(" close=")">
+            #{setmealId}
+        </foreach>
+    </delete>
 </mapper>
