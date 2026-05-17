@@ -20,7 +20,7 @@ public interface SetmealDishMapper {
     void insertSetmealDish(@Param("setmealDishes") List<SetmealDish> setmealDishes);
 
     /**
-     * 根据套餐id查询套餐菜品关系
+     * 根据套餐id删除套餐菜品关系
      *
      * @param ids
      * @return

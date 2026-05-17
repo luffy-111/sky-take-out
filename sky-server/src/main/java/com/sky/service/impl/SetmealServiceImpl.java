@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -101,5 +102,30 @@ public class SetmealServiceImpl implements SetmealService {
         List<SetmealDish> setmealDishes = setmealDishMapper.getBySetmealId(id);
         setmealDTO.setSetmealDishes(setmealDishes);
         return setmealDTO;
+    }
+
+    /**
+     * 修改套餐
+     *
+     * @param setmealDTO
+     */
+    @Override
+    @Transactional
+    public void update(SetmealDTO setmealDTO) {
+        Setmeal setmeal = new Setmeal();
+        BeanUtils.copyProperties(setmealDTO, setmeal);
+
+        // 修改套餐
+        setmealMapper.update(setmeal);
+        // 修改套餐和菜品的关联关系(先删除再统一添加)
+        // Collections.singletonList() 的作用是把单个元素包装成一个只有一个元素的 List, 复用批量删除的逻辑
+        setmealDishMapper.deleteBySetmealIds(Collections.singletonList(setmealDTO.getId()));
+        List<SetmealDish> setmealDishes = setmealDTO.getSetmealDishes();
+        if (setmealDishes != null && !setmealDishes.isEmpty()) {
+            for (SetmealDish dishId : setmealDishes) {
+                dishId.setSetmealId(setmealDTO.getId());
+            }
+            setmealDishMapper.insertSetmealDish(setmealDishes);
+        }
     }
 }
