@@ -11,4 +11,19 @@
                 #{description}, #{image}, #{createTime}, #{updateTime}, #{createUser}, #{updateUser})
     </insert>
 
+    <!--分页查询套餐-->
+    <select id="pageQuery" resultType="com.sky.entity.Setmeal">
+        select setmeal.id          as id,
+               setmeal.category_id as categoryId,
+               setmeal.name        as name,
+               setmeal.price       as price,
+               setmeal.status      as status,
+               setmeal.description as description,
+               setmeal.image       as image,
+               setmeal.update_time as updateTime,
+               category.name       as categoryName
+        from setmeal
+                 left join category on setmeal.category_id = category.id
+    </select>
+
 </mapper>
