@@ -48,4 +48,19 @@
         </foreach>
     </delete>
 
+    <select id="getByIdWithDish" resultType="com.sky.entity.Setmeal">
+        select setmeal.category_id as categoryId,
+               category.name       as categoryName,
+               setmeal.description as description,
+               setmeal.id          as id,
+               setmeal.image       as image,
+               setmeal.name        as name,
+               setmeal.price       as price,
+               setmeal.status      as status,
+               setmeal.update_time as updateTime
+        from setmeal
+                 left join category on setmeal.category_id = category.id
+        where setmeal.id = #{id}
+    </select>
+
 </mapper>

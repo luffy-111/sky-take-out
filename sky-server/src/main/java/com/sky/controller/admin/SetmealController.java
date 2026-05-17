@@ -62,4 +62,17 @@ public class SetmealController {
         setmealService.deleteById(ids);
         return Result.success();
     }
+
+    /**
+     * 根据ID查询套餐和对应的菜品
+     * @param id
+     * @return
+     *  */
+    @GetMapping("/{id}")
+    @ApiOperation("根据ID查询套餐和对应的菜品")
+    public Result<SetmealDTO> getById(@PathVariable Long id) {
+        log.info("根据ID查询套餐和对应的菜品：{}", id);
+        SetmealDTO setmealDTO = setmealService.getByIdWithDish(id);
+        return Result.success(setmealDTO);
+    }
 }

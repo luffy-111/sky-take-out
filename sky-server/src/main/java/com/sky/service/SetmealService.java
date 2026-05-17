@@ -30,4 +30,12 @@ public interface SetmealService {
      * @param ids
      */
     void deleteById(List<Long> ids);
+
+    /**
+     * 根据ID查询套餐和关联的菜品数据
+     *
+     * @param id
+     * @return
+     */
+    SetmealDTO getByIdWithDish(Long id);
 }
