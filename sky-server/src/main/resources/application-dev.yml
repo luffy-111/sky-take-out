@@ -9,7 +9,10 @@ sky:
   file:
     upload-path: D:/Java/sky-take-out/upload/
   redis:
-      host: (your redis host)
-      port: (your redis port)
-      password: (your redis password)
-      database: (your redis database)
+    host: (your redis host)
+    port: (your redis port)
+    password: (your redis password)
+    database: (your redis database)
+  wechat:
+    appid: (your wechat appid)
+    secret: (your wechat secret)
