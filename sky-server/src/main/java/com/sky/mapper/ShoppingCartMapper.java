@@ -11,7 +11,7 @@ import java.util.List;
 public interface ShoppingCartMapper {
 
     /**
-     * 添加购物车
+     * 动态查询购物车
      *
      * @param shoppingCart
      */
