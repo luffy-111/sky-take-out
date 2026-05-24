@@ -50,24 +50,25 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
             ShoppingCart cart = list.get(0);
             cart.setNumber(cart.getNumber() + 1);
             shoppingCartMapper.updateNumberById(cart);
-        } else {
-            // 如果不存在，添加到购物车(插入一条购物车数据)，数量默认为1
-            Long dishId = shoppingCartDTO.getDishId();
-            if (dishId != null) {
-                // 添加菜品
-                Dish dish = dishMapper.getById(dishId);
-                shoppingCart.setName(dish.getName());
-                shoppingCart.setImage(dish.getImage());
-                shoppingCart.setAmount(dish.getPrice());
-            } else {
-                Long setmealId = shoppingCartDTO.getSetmealId();
-                // 添加套餐
-                Setmeal setmeal = setmealMapper.getById(setmealId);
-                shoppingCart.setName(setmeal.getName());
-                shoppingCart.setImage(setmeal.getImage());
-                shoppingCart.setAmount(setmeal.getPrice());
-            }
+            return;
         }
+        // 如果不存在，添加到购物车(插入一条购物车数据)，数量默认为1
+        Long dishId = shoppingCartDTO.getDishId();
+        if (dishId != null) {
+            // 添加菜品
+            Dish dish = dishMapper.getById(dishId);
+            shoppingCart.setName(dish.getName());
+            shoppingCart.setImage(dish.getImage());
+            shoppingCart.setAmount(dish.getPrice());
+        } else {
+            Long setmealId = shoppingCartDTO.getSetmealId();
+            // 添加套餐
+            Setmeal setmeal = setmealMapper.getById(setmealId);
+            shoppingCart.setName(setmeal.getName());
+            shoppingCart.setImage(setmeal.getImage());
+            shoppingCart.setAmount(setmeal.getPrice());
+        }
+
         shoppingCart.setNumber(1);
         shoppingCart.setCreateTime(LocalDateTime.now());
         shoppingCartMapper.insert(shoppingCart);
