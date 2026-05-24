@@ -2,6 +2,7 @@ package com.sky.service.impl;
 
 import com.sky.constant.MessageConstant;
 import com.sky.context.BaseContext;
+import com.sky.dto.OrdersPaymentDTO;
 import com.sky.dto.OrdersSubmitDTO;
 import com.sky.entity.AddressBook;
 import com.sky.entity.OrderDetail;
@@ -14,6 +15,7 @@ import com.sky.mapper.OrderDetailMapper;
 import com.sky.mapper.OrderMapper;
 import com.sky.mapper.ShoppingCartMapper;
 import com.sky.service.OrderService;
+import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderSubmitVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,6 +97,35 @@ public class OrderServiceImpl implements OrderService {
                 .orderNumber(orders.getNumber())
                 .orderAmount(orders.getAmount())
                 .build();
+    }
+
+    /**
+     * 订单支付 - 模拟支付，跳过微信支付
+     */
+    public OrderPaymentVO payment(OrdersPaymentDTO ordersPaymentDTO) {
+        // 直接调用支付成功逻辑，更新订单状态
+        paySuccess(ordersPaymentDTO.getOrderNumber());
+
+        // 返回空的 VO，前端收到后会跳转支付成功页
+        return new OrderPaymentVO();
+    }
+
+    /**
+     * 支付成功，修改订单状态
+     */
+    public void paySuccess(String outTradeNo) {
+        // 根据订单号查询订单
+        Orders ordersDB = orderMapper.getByOrderNumber(outTradeNo);
+
+        // 更新订单状态：待付款 -> 待接单，支付状态 -> 已支付
+        Orders orders = Orders.builder()
+                .id(ordersDB.getId())
+                .status(Orders.TO_BE_CONFIRMED)   // 待接单
+                .payStatus(Orders.PAID)            // 已支付
+                .checkoutTime(LocalDateTime.now()) // 结账时间
+                .build();
+
+        orderMapper.update(orders);
     }
 }
 
