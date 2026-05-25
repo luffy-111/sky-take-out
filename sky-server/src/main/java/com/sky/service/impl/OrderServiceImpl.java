@@ -30,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -120,23 +121,49 @@ public class OrderServiceImpl implements OrderService {
      */
     @Override
     public PageResult pageQuery(OrdersPageQueryDTO ordersPageQueryDTO) {
+        ordersPageQueryDTO.setUserId(BaseContext.getCurrentId());
         // 设置分页参数
         PageHelper.startPage(ordersPageQueryDTO.getPage(), ordersPageQueryDTO.getPageSize());
         Page<Orders> page = orderMapper.pageQuery(ordersPageQueryDTO);
         List<OrderVO> list = new ArrayList<>();
         if (page != null && page.getTotal() > 0) {
             for (Orders orders : page) {
-                OrderVO orderVO = new OrderVO();
-                BeanUtils.copyProperties(orders, orderVO);
-
-                // 查询订单详情
-                List<OrderDetail> orderDetailList = orderDetailMapper.getByOrderId(orders.getId());
-                orderVO.setOrderDetailList(orderDetailList);
-
-                list.add(orderVO);
+                list.add(buildOrderVO(orders));
             }
         }
         return new PageResult(page.getTotal(), list);
+    }
+
+    /**
+     * 查询订单详情
+     */
+    @Override
+    public OrderVO getOrderDetail(Long id) {
+        Orders orders = orderMapper.getById(id);
+        if (orders == null || !BaseContext.getCurrentId().equals(orders.getUserId())) {
+            return null;
+        }
+
+        return buildOrderVO(orders);
+    }
+
+    private OrderVO buildOrderVO(Orders orders) {
+        OrderVO orderVO = new OrderVO();
+        BeanUtils.copyProperties(orders, orderVO);
+
+        List<OrderDetail> orderDetailList = orderDetailMapper.getByOrderId(orders.getId());
+        orderVO.setOrderDetailList(orderDetailList);
+        orderVO.setOrderDishes(buildOrderDishes(orderDetailList));
+        return orderVO;
+    }
+
+    private String buildOrderDishes(List<OrderDetail> orderDetailList) {
+        if (orderDetailList == null || orderDetailList.isEmpty()) {
+            return "";
+        }
+        return orderDetailList.stream()
+                .map(orderDetail -> orderDetail.getName() + " x" + orderDetail.getNumber())
+                .collect(Collectors.joining("; "));
     }
 
     /**

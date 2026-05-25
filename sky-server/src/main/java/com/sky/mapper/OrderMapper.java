@@ -24,6 +24,14 @@ public interface OrderMapper {
     Orders getByOrderNumber(String outTradeNo);
 
     /**
+     * 根据id查询订单
+     *
+     * @param id
+     * @return
+     */
+    Orders getById(Long id);
+
+    /**
      * 修改订单信息
      *
      * @param orders
