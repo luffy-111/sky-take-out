@@ -108,6 +108,7 @@ public class OrderServiceImpl implements OrderService {
     /**
      * 订单支付 - 模拟支付，跳过微信支付
      */
+    @Override
     public OrderPaymentVO payment(OrdersPaymentDTO ordersPaymentDTO) {
         // 直接调用支付成功逻辑，更新订单状态
         paySuccess(ordersPaymentDTO.getOrderNumber());
@@ -123,6 +124,22 @@ public class OrderServiceImpl implements OrderService {
     public PageResult pageQuery(OrdersPageQueryDTO ordersPageQueryDTO) {
         ordersPageQueryDTO.setUserId(BaseContext.getCurrentId());
         // 设置分页参数
+        PageHelper.startPage(ordersPageQueryDTO.getPage(), ordersPageQueryDTO.getPageSize());
+        Page<Orders> page = orderMapper.pageQuery(ordersPageQueryDTO);
+        List<OrderVO> list = new ArrayList<>();
+        if (page != null && page.getTotal() > 0) {
+            for (Orders orders : page) {
+                list.add(buildOrderVO(orders));
+            }
+        }
+        return new PageResult(page.getTotal(), list);
+    }
+
+    /**
+     * 管理端订单搜索
+     */
+    @Override
+    public PageResult conditionSearch(OrdersPageQueryDTO ordersPageQueryDTO) {
         PageHelper.startPage(ordersPageQueryDTO.getPage(), ordersPageQueryDTO.getPageSize());
         Page<Orders> page = orderMapper.pageQuery(ordersPageQueryDTO);
         List<OrderVO> list = new ArrayList<>();

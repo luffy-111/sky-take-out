@@ -35,6 +35,14 @@ public interface OrderService {
     PageResult pageQuery(OrdersPageQueryDTO ordersPageQueryDTO);
 
     /**
+     * 管理端订单搜索
+     *
+     * @param ordersPageQueryDTO
+     * @return
+     */
+    PageResult conditionSearch(OrdersPageQueryDTO ordersPageQueryDTO);
+
+    /**
      * 查询订单详情
      *
      * @param id
