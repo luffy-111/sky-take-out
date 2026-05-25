@@ -147,6 +147,30 @@ public class OrderServiceImpl implements OrderService {
         return buildOrderVO(orders);
     }
 
+    /**
+     * 取消订单
+     */
+    @Override
+    @Transactional
+    public void cancelOrder(Long id) {
+        Orders orders = orderMapper.getById(id);
+        if (orders == null || !BaseContext.getCurrentId().equals(orders.getUserId())) {
+            return;
+        }
+
+        if (!(Orders.PENDING_PAYMENT.equals(orders.getStatus()) || Orders.TO_BE_CONFIRMED.equals(orders.getStatus()))) {
+            throw new RuntimeException(MessageConstant.ORDER_STATUS_ERROR);
+        }
+
+        Orders update = Orders.builder()
+                .id(id)
+                .status(Orders.CANCELLED)
+                .cancelTime(LocalDateTime.now())
+                .cancelReason("用户取消订单")
+                .build();
+        orderMapper.update(update);
+    }
+
     private OrderVO buildOrderVO(Orders orders) {
         OrderVO orderVO = new OrderVO();
         BeanUtils.copyProperties(orders, orderVO);
