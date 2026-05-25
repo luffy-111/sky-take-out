@@ -171,6 +171,34 @@ public class OrderServiceImpl implements OrderService {
         orderMapper.update(update);
     }
 
+    /**
+     * 再来一单
+     */
+    @Override
+    @Transactional
+    public void repetition(Long id) {
+        Orders orders = orderMapper.getById(id);
+        if (orders == null || !BaseContext.getCurrentId().equals(orders.getUserId())) {
+            return;
+        }
+
+        List<OrderDetail> orderDetailList = orderDetailMapper.getByOrderId(id);
+        if (orderDetailList == null || orderDetailList.isEmpty()) {
+            throw new RuntimeException(MessageConstant.ORDER_NOT_FOUND);
+        }
+
+        Long userId = BaseContext.getCurrentId();
+        shoppingCartMapper.deleteByUserId(userId);
+        for (OrderDetail orderDetail : orderDetailList) {
+            ShoppingCart shoppingCart = new ShoppingCart();
+            BeanUtils.copyProperties(orderDetail, shoppingCart);
+            shoppingCart.setId(null);
+            shoppingCart.setUserId(userId);
+            shoppingCart.setCreateTime(LocalDateTime.now());
+            shoppingCartMapper.insert(shoppingCart);
+        }
+    }
+
     private OrderVO buildOrderVO(Orders orders) {
         OrderVO orderVO = new OrderVO();
         BeanUtils.copyProperties(orders, orderVO);
@@ -193,7 +221,7 @@ public class OrderServiceImpl implements OrderService {
     /**
      * 支付成功，修改订单状态
      */
-    public void paySuccess(String outTradeNo) {
+    private void paySuccess(String outTradeNo) {
         // 根据订单号查询订单
         Orders ordersDB = orderMapper.getByOrderNumber(outTradeNo);
 
