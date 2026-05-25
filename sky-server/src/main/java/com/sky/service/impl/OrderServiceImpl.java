@@ -283,6 +283,28 @@ public class OrderServiceImpl implements OrderService {
     }
 
     /**
+     * 完成订单
+     */
+    @Override
+    @Transactional
+    public void completeOrder(Long id) {
+        Orders orders = orderMapper.getById(id);
+        if (orders == null) {
+            return;
+        }
+
+        if (!Orders.DELIVERY_IN_PROGRESS.equals(orders.getStatus())) {
+            throw new RuntimeException(MessageConstant.ORDER_STATUS_ERROR);
+        }
+
+        Orders update = Orders.builder()
+                .id(id)
+                .status(Orders.COMPLETED)
+                .build();
+        orderMapper.update(update);
+    }
+
+    /**
      * 取消订单
      */
     @Override
