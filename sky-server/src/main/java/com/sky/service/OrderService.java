@@ -59,6 +59,14 @@ public interface OrderService {
     OrderVO getOrderDetail(Long id);
 
     /**
+     * 管理端查询订单详情
+     *
+     * @param id
+     * @return
+     */
+    OrderVO adminOrderDetail(Long id);
+
+    /**
      * 取消订单
      *
      * @param id

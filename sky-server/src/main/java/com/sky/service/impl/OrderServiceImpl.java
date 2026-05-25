@@ -178,6 +178,18 @@ public class OrderServiceImpl implements OrderService {
     }
 
     /**
+     * 管理端查询订单详情
+     */
+    @Override
+    public OrderVO adminOrderDetail(Long id) {
+        Orders orders = orderMapper.getById(id);
+        if (orders == null) {
+            return null;
+        }
+        return buildOrderVO(orders);
+    }
+
+    /**
      * 取消订单
      */
     @Override
@@ -232,6 +244,12 @@ public class OrderServiceImpl implements OrderService {
     private OrderVO buildOrderVO(Orders orders) {
         OrderVO orderVO = new OrderVO();
         BeanUtils.copyProperties(orders, orderVO);
+
+        AddressBook addressBook = addressBookMapper.getById(orders.getAddressBookId());
+        if (addressBook != null) {
+            orderVO.setAddress(addressBook.getProvinceName() + addressBook.getCityName()
+                    + addressBook.getDistrictName() + addressBook.getDetail());
+        }
 
         List<OrderDetail> orderDetailList = orderDetailMapper.getByOrderId(orders.getId());
         orderVO.setOrderDetailList(orderDetailList);
