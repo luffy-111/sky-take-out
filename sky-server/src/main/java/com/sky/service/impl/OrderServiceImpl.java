@@ -6,6 +6,7 @@ import com.sky.constant.MessageConstant;
 import com.sky.context.BaseContext;
 import com.sky.dto.OrdersPageQueryDTO;
 import com.sky.dto.OrdersPaymentDTO;
+import com.sky.dto.OrdersRejectionDTO;
 import com.sky.dto.OrdersSubmitDTO;
 import com.sky.entity.AddressBook;
 import com.sky.entity.OrderDetail;
@@ -207,6 +208,30 @@ public class OrderServiceImpl implements OrderService {
         Orders update = Orders.builder()
                 .id(id)
                 .status(Orders.CONFIRMED)
+                .build();
+        orderMapper.update(update);
+    }
+
+    /**
+     * 拒单
+     */
+    @Override
+    @Transactional
+    public void rejectionOrder(OrdersRejectionDTO ordersRejectionDTO) {
+        Orders orders = orderMapper.getById(ordersRejectionDTO.getId());
+        if (orders == null) {
+            return;
+        }
+
+        if (!Orders.TO_BE_CONFIRMED.equals(orders.getStatus())) {
+            throw new RuntimeException(MessageConstant.ORDER_STATUS_ERROR);
+        }
+
+        Orders update = Orders.builder()
+                .id(ordersRejectionDTO.getId())
+                .status(Orders.CANCELLED)
+                .rejectionReason(ordersRejectionDTO.getRejectionReason())
+                .cancelTime(LocalDateTime.now())
                 .build();
         orderMapper.update(update);
     }
