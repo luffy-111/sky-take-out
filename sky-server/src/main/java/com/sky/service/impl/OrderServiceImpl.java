@@ -190,6 +190,28 @@ public class OrderServiceImpl implements OrderService {
     }
 
     /**
+     * 接单
+     */
+    @Override
+    @Transactional
+    public void confirmOrder(Long id) {
+        Orders orders = orderMapper.getById(id);
+        if (orders == null) {
+            return;
+        }
+
+        if (!Orders.TO_BE_CONFIRMED.equals(orders.getStatus())) {
+            throw new RuntimeException(MessageConstant.ORDER_STATUS_ERROR);
+        }
+
+        Orders update = Orders.builder()
+                .id(id)
+                .status(Orders.CONFIRMED)
+                .build();
+        orderMapper.update(update);
+    }
+
+    /**
      * 取消订单
      */
     @Override

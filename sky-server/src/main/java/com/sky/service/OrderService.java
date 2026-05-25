@@ -67,6 +67,13 @@ public interface OrderService {
     OrderVO adminOrderDetail(Long id);
 
     /**
+     * 接单
+     *
+     * @param id
+     */
+    void confirmOrder(Long id);
+
+    /**
      * 取消订单
      *
      * @param id
