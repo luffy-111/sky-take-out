@@ -4,10 +4,7 @@ import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.sky.constant.MessageConstant;
 import com.sky.context.BaseContext;
-import com.sky.dto.OrdersPageQueryDTO;
-import com.sky.dto.OrdersPaymentDTO;
-import com.sky.dto.OrdersRejectionDTO;
-import com.sky.dto.OrdersSubmitDTO;
+import com.sky.dto.*;
 import com.sky.entity.AddressBook;
 import com.sky.entity.OrderDetail;
 import com.sky.entity.Orders;
@@ -232,6 +229,33 @@ public class OrderServiceImpl implements OrderService {
                 .status(Orders.CANCELLED)
                 .rejectionReason(ordersRejectionDTO.getRejectionReason())
                 .cancelTime(LocalDateTime.now())
+                .build();
+        orderMapper.update(update);
+    }
+
+    /**
+     * 管理端取消订单
+     */
+    @Override
+    @Transactional
+    public void adminCancelOrder(OrdersCancelDTO ordersCancelDTO) {
+        Orders orders = orderMapper.getById(ordersCancelDTO.getId());
+        if (orders == null) {
+            return;
+        }
+
+        if (!(Orders.PENDING_PAYMENT.equals(orders.getStatus())
+                || Orders.TO_BE_CONFIRMED.equals(orders.getStatus())
+                || Orders.CONFIRMED.equals(orders.getStatus())
+                || Orders.DELIVERY_IN_PROGRESS.equals(orders.getStatus()))) {
+            throw new RuntimeException(MessageConstant.ORDER_STATUS_ERROR);
+        }
+
+        Orders update = Orders.builder()
+                .id(ordersCancelDTO.getId())
+                .status(Orders.CANCELLED)
+                .cancelTime(LocalDateTime.now())
+                .cancelReason(ordersCancelDTO.getCancelReason())
                 .build();
         orderMapper.update(update);
     }
