@@ -364,6 +364,26 @@ public class OrderServiceImpl implements OrderService {
         }
     }
 
+    /**
+     * 催单
+     */
+    @Override
+    public void reminder(Long id) {
+        // 根据id查询订单
+        Orders orders = orderMapper.getById(id);
+
+        // 校验订单是否存在
+        if (orders == null) {
+            throw new RuntimeException(MessageConstant.ORDER_NOT_FOUND);
+        }
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("type", 2);  // 1表示来单提醒, 2表示催单
+        map.put("orderId", id);  // 订单id
+        map.put("content", "订单号：" + orders.getNumber());  // 内容
+        webSocketServer.sendToAllClient(JSON.toJSONString(map));
+    }
+
     private OrderVO buildOrderVO(Orders orders) {
         OrderVO orderVO = new OrderVO();
         BeanUtils.copyProperties(orders, orderVO);

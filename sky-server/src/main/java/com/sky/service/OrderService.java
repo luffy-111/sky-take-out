@@ -116,4 +116,11 @@ public interface OrderService {
      * @param id
      */
     void repetition(Long id);
+
+    /**
+     * 订单催单
+     *
+     * @param id
+     */
+    void reminder(Long id);
 }
