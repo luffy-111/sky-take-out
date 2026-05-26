@@ -68,4 +68,23 @@
         where status = #{status}
     </select>
 
+    <!--爆红可以忽略-->
+    <!-- IDEA 的 MyBatis 插件会尝试去检查 #{begin}、#{end}、#{status} 是否存在于参数对象中。
+    但参数是 Map，插件无法静态分析 Map 里有哪些 key，所以标红提示"找不到属性". -->
+    <select id="sumByMap" resultType="java.lang.Double">
+        SELECT SUM(amount)
+        FROM orders
+        <where>
+            <if test="begin != null">
+                AND order_time &gt;= #{begin}
+            </if>
+            <if test="end != null">
+                AND order_time &lt;= #{end}
+            </if>
+            <if test="status != null">
+                AND status = #{status}
+            </if>
+        </where>
+    </select>
+
 </mapper>
