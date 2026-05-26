@@ -4,6 +4,7 @@ import com.github.pagehelper.Page;
 import com.sky.dto.GoodsSalesDTO;
 import com.sky.dto.OrdersPageQueryDTO;
 import com.sky.entity.Orders;
+import org.apache.ibatis.annotations.MapKey;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
@@ -85,6 +86,26 @@ public interface OrderMapper {
      * @return
      */
     Integer countByMap(Map<String, Object> map);
+
+    /**
+     * 营业额统计
+     *
+     * @param begin
+     * @param end
+     * @return
+     */
+    @MapKey("statDate")
+    List<Map<String, Object>> getTurnoverStatistics(LocalDateTime begin, LocalDateTime end);
+
+    /**
+     * 订单统计
+     *
+     * @param begin
+     * @param end
+     * @return
+     */
+    @MapKey("statDate")
+    List<Map<String, Object>> getOrderStatistics(LocalDateTime begin, LocalDateTime end);
 
     /**
      * 查询销量排名top10

@@ -19,4 +19,22 @@
             </if>
         </where>
     </select>
+
+    <select id="getUserStatistics" resultType="java.util.Map">
+        SELECT t.statDate,
+               t.userCount,
+               (
+                   SELECT COUNT(id)
+                   FROM user
+                   WHERE create_time &lt; #{begin}
+               ) AS totalUser
+        FROM (
+                 SELECT DATE(create_time) AS statDate, COUNT(id) AS userCount
+                 FROM user
+                 WHERE create_time &gt;= #{begin}
+                   AND create_time &lt;= #{end}
+                 GROUP BY DATE(create_time)
+                 ORDER BY statDate
+             ) t
+    </select>
 </mapper>

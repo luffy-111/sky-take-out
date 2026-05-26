@@ -87,6 +87,42 @@
         </where>
     </select>
 
+    <select id="getTurnoverStatistics" resultType="java.util.Map">
+        SELECT DATE(order_time) AS statDate, IFNULL(SUM(amount), 0) AS totalAmount
+        FROM orders
+        WHERE status = 5
+          AND order_time &gt;= #{begin}
+          AND order_time &lt;= #{end}
+        GROUP BY DATE(order_time)
+        ORDER BY statDate
+    </select>
+
+    <select id="getUserStatistics" resultType="java.util.Map">
+        SELECT DATE(create_time) AS statDate, COUNT(id) AS userCount
+        FROM user
+        WHERE create_time &gt;= #{begin}
+          AND create_time &lt;= #{end}
+        GROUP BY DATE(create_time)
+        ORDER BY statDate
+    </select>
+
+    <select id="countUserBefore" resultType="java.lang.Integer">
+        SELECT COUNT(id)
+        FROM user
+        WHERE create_time &lt; #{end}
+    </select>
+
+    <select id="getOrderStatistics" resultType="java.util.Map">
+        SELECT DATE(order_time) AS statDate,
+               COUNT(id) AS orderCount,
+               SUM(CASE WHEN status = 5 THEN 1 ELSE 0 END) AS validOrderCount
+        FROM orders
+        WHERE order_time &gt;= #{begin}
+          AND order_time &lt;= #{end}
+        GROUP BY DATE(order_time)
+        ORDER BY statDate
+    </select>
+
     <select id="countByMap" resultType="java.lang.Integer">
         SELECT COUNT(id)
         FROM orders

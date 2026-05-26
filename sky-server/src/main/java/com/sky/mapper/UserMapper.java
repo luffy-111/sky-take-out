@@ -33,4 +33,13 @@ public interface UserMapper {
      * @return
      */
     Integer countByMap(Map<String, Object> map);
+
+    /**
+     * 用户统计
+     *
+     * @param begin
+     * @param end
+     * @return
+     */
+    java.util.List<java.util.Map<String, Object>> getUserStatistics(java.time.LocalDateTime begin, java.time.LocalDateTime end);
 }
