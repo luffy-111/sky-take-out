@@ -1,9 +1,10 @@
 package com.sky.mapper;
 
 import com.sky.entity.User;
-import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
+
+import java.time.LocalDateTime;
 
 import java.util.Map;
 
@@ -41,5 +42,5 @@ public interface UserMapper {
      * @param end
      * @return
      */
-    java.util.List<java.util.Map<String, Object>> getUserStatistics(java.time.LocalDateTime begin, java.time.LocalDateTime end);
+    java.util.List<java.util.Map<String, Object>> getUserStatistics(LocalDateTime begin, LocalDateTime end);
 }
