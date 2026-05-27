@@ -4,7 +4,6 @@ import com.sky.dto.GoodsSalesDTO;
 import com.sky.mapper.OrderMapper;
 import com.sky.mapper.UserMapper;
 import com.sky.service.ReportService;
-import com.sky.service.WorkspaceService;
 import com.sky.vo.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -21,6 +20,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -35,8 +35,6 @@ public class ReportServiceImpl implements ReportService {
     @Autowired
     private UserMapper userMapper;
 
-    @Autowired
-    private WorkspaceService workspaceService;
 
     /**
      * 营业额统计
@@ -219,8 +217,56 @@ public class ReportServiceImpl implements ReportService {
         LocalDateTime beginTime = LocalDateTime.of(begin, LocalTime.MIN);
         LocalDateTime endTime = LocalDateTime.of(end, LocalTime.MAX);
 
-        // 查询概览数据
-        BusinessDataVO businessDataVO = workspaceService.getBusinessData(beginTime, endTime);
+        // 一次性查询汇总和明细所需数据，避免按天循环查询数据库
+        Map<String, Double> turnoverMap = orderMapper.getTurnoverStatistics(beginTime, endTime)
+                .stream()
+                .collect(Collectors.toMap(
+                        item -> item.get("statDate").toString(),
+                        item -> ((Number) item.get("totalAmount")).doubleValue()
+                ));
+
+        Map<String, Map<String, Object>> orderStatisticsMap = orderMapper.getOrderStatistics(beginTime, endTime)
+                .stream()
+                .collect(Collectors.toMap(
+                        item -> item.get("statDate").toString(),
+                        item -> item
+                ));
+
+        Map<String, Integer> userStatisticsMap = userMapper.getUserStatistics(beginTime, endTime)
+                .stream()
+                .collect(Collectors.toMap(
+                        item -> item.get("statDate").toString(),
+                        item -> ((Number) item.get("userCount")).intValue()
+                ));
+
+        double turnover = turnoverMap.values().stream().mapToDouble(Double::doubleValue).sum();
+        int totalOrderCount = 0;
+        int validOrderCount = 0;
+        int newUsers = 0;
+        for (int i = 0; i < 30; i++) {
+            LocalDate date = begin.plusDays(i);
+            String key = date.toString();
+            Map<String, Object> orderStat = orderStatisticsMap.get(key);
+            if (orderStat != null) {
+                totalOrderCount += ((Number) orderStat.get("orderCount")).intValue();
+                Object validOrderCountObj = orderStat.get("validOrderCount");
+                if (validOrderCountObj != null) {
+                    validOrderCount += ((Number) validOrderCountObj).intValue();
+                }
+            }
+            newUsers += userStatisticsMap.getOrDefault(key, 0);
+        }
+        double orderCompletionRate = totalOrderCount == 0 ? 0.0 : (double) validOrderCount / totalOrderCount;
+        double unitPrice = validOrderCount == 0 ? 0.0 : turnover / validOrderCount;
+
+        BusinessDataVO businessDataVO = BusinessDataVO.builder()
+                .turnover(turnover)
+                .validOrderCount(validOrderCount)
+                .orderCompletionRate(orderCompletionRate)
+                .unitPrice(unitPrice)
+                .newUsers(newUsers)
+                .build();
+
         // 2.通过POI将数据写入Excel
         InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("template/运营数据报表模板.xlsx");
         if (inputStream != null) {
@@ -242,16 +288,21 @@ public class ReportServiceImpl implements ReportService {
                 // 填写明细数据
                 for (int i = 0; i < 30; i++) {
                     LocalDate date = begin.plusDays(i);
-                    LocalDateTime dateBegin = LocalDateTime.of(date, LocalTime.MIN);
-                    LocalDateTime dateEnd = LocalDateTime.of(date, LocalTime.MAX);
-                    BusinessDataVO dayBusinessDataVO = workspaceService.getBusinessData(dateBegin, dateEnd);
+                    String key = date.toString();
+                    Map<String, Object> orderStat = orderStatisticsMap.get(key);
+                    Double dayTurnover = turnoverMap.getOrDefault(key, 0.0);
+                    int dayOrderCount = orderStat == null ? 0 : ((Number) orderStat.get("orderCount")).intValue();
+                    Integer dayValidOrderCount = orderStat == null || orderStat.get("validOrderCount") == null ? 0 : ((Number) orderStat.get("validOrderCount")).intValue();
+                    double dayOrderCompletionRate = dayOrderCount == 0 ? 0.0 : (double) dayValidOrderCount / dayOrderCount;
+                    double dayUnitPrice = dayValidOrderCount == 0 ? 0.0 : dayTurnover / dayValidOrderCount;
+                    Integer dayNewUsers = userStatisticsMap.getOrDefault(key, 0);
 
-                    sheet.getRow(7 + i).getCell(1).setCellValue(date.toString());
-                    sheet.getRow(7 + i).getCell(2).setCellValue(dayBusinessDataVO.getTurnover());
-                    sheet.getRow(7 + i).getCell(3).setCellValue(dayBusinessDataVO.getValidOrderCount());
-                    sheet.getRow(7 + i).getCell(4).setCellValue(dayBusinessDataVO.getOrderCompletionRate());
-                    sheet.getRow(7 + i).getCell(5).setCellValue(dayBusinessDataVO.getUnitPrice());
-                    sheet.getRow(7 + i).getCell(6).setCellValue(dayBusinessDataVO.getNewUsers());
+                    sheet.getRow(7 + i).getCell(1).setCellValue(key);
+                    sheet.getRow(7 + i).getCell(2).setCellValue(dayTurnover);
+                    sheet.getRow(7 + i).getCell(3).setCellValue(dayValidOrderCount);
+                    sheet.getRow(7 + i).getCell(4).setCellValue(dayOrderCompletionRate);
+                    sheet.getRow(7 + i).getCell(5).setCellValue(dayUnitPrice);
+                    sheet.getRow(7 + i).getCell(6).setCellValue(dayNewUsers);
                 }
                 // 3.通过输出流将Excel文件下载到客户端
                 ServletOutputStream out = response.getOutputStream();
